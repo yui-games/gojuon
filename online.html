@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>五十音マインスイーパー オンライン</title>
+<link rel="stylesheet" href="gojuon.css">
+<style>
+  .topbar{display:flex;align-items:center;gap:8px;font-size:12px;padding:2px 4px 6px}
+  .topbar .sp{flex:1}
+  .conn{display:inline-block;width:10px;height:10px;border-radius:50%;background:#1a1;border:1px solid #060}
+  .conn.bad{background:#d22;border-color:#700}
+  .code{font-family:"Courier New",monospace;font-size:28px;font-weight:900;letter-spacing:6px;text-align:center;background:#000;color:#ff2020;padding:6px;border:2px solid;border-color:var(--dark) var(--light) var(--light) var(--dark)}
+  .qr{display:flex;justify-content:center;margin:8px 0}
+  .qr svg{width:180px;height:180px;background:#fff;padding:4px;border:2px solid;border-color:var(--dark) var(--light) var(--light) var(--dark)}
+  .seat{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#fff;border:1px solid var(--dark);margin:4px 0;font-size:14px}
+  .seat .dot{width:10px;height:10px;border-radius:50%;background:#bbb;border:1px solid #777}
+  .seat .dot.on{background:#1a1;border-color:#060}
+  .seat .tag{font-size:11px;color:#333;border:1px solid #999;padding:0 5px;margin-left:auto}
+  .lobbyErr{color:#c00;font-size:13px;min-height:18px}
+  .small{font-size:12px;color:#333}
+  .spec{background:#ffc;border:1px solid #cc9;padding:4px 8px;font-size:12px;margin:0 0 6px}
+  #toast{position:fixed;left:50%;bottom:70px;transform:translateX(-50%);background:#000;color:#fff;padding:8px 14px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20;max-width:90vw}
+  #toast.show{opacity:.92}
+</style>
+</head>
+<body>
+
+<!-- ===== ロビー ===== -->
+<section id="lobby" class="win">
+  <div class="title"><span class="ico">🌐</span>五十音マインスイーパー オンライン<span class="sp"></span><span class="tb">×</span></div>
+  <fieldset>
+    <legend>あなたの名前</legend>
+    <input type="text" id="nm" maxlength="10" placeholder="なまえ" autocomplete="off">
+  </fieldset>
+  <fieldset>
+    <legend>部屋に入る（コードを教えてもらった人）</legend>
+    <div style="display:flex;gap:6px">
+      <input type="text" id="code" maxlength="4" placeholder="部屋コード（4文字）" autocomplete="off" style="text-transform:uppercase;font-family:'Courier New',monospace;font-size:20px;letter-spacing:4px">
+      <button class="btn default" id="btnJoin" style="flex:0 0 auto;font-weight:700">入室</button>
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>部屋をつくる（ホスト）</legend>
+    <div class="modes">
+      <button class="btn on" id="cmRandom">ランダム出題<br><small>自分も対戦する</small></button>
+      <button class="btn" id="cmSetter">お題を自分で入力<br><small>自分は出題者・対戦しない</small></button>
+    </div>
+    <div id="cRandom">
+      <div style="margin:4px 0 2px">難易度（お題の文字数）</div>
+      <div class="modes" id="levels">
+        <button class="btn" data-level="easy">かんたん<br><small>5文字以下</small></button>
+        <button class="btn" data-level="normal">ふつう<br><small>6〜10文字</small></button>
+        <button class="btn" data-level="hard">むずかしい<br><small>11文字以上</small></button>
+      </div>
+      <label class="row">ジャンル <select id="genre"><option value="">すべて</option></select></label>
+      <label class="row"><input type="checkbox" id="optGenre" checked>ジャンルをヒントとして見せる</label>
+    </div>
+    <div id="cSetter" class="hidden">
+      <input type="text" id="setWord" placeholder="お題（ひらがな・カタカナ）" autocomplete="off">
+      <div class="small" id="setPreview" style="min-height:18px"></div>
+      <div class="small">※あなたは出題者になり、対戦する2人が入室するのを待ちます。お題は対戦する2人には見えません。</div>
+    </div>
+    <label class="row"><input type="checkbox" id="optLen" checked>お題の文字数を見せる</label>
+    <label class="row"><input type="checkbox" id="optCascade">数字が0のマスは、まわりも自動で開く</label>
+    <div class="pad" style="padding-left:0;padding-right:0"><button class="btn big" id="btnCreate">部屋をつくる</button></div>
+  </fieldset>
+  <div class="lobbyErr" id="lobbyErr" style="padding:0 8px"></div>
+  <details style="padding:4px 8px"><summary class="small">サーバー（ふだんは変更不要）</summary><input type="text" id="srv" autocomplete="off" style="font-size:12px"></details>
+  <div class="pad" style="display:flex;gap:6px">
+    <a class="btn" href="index.html" style="flex:1;text-align:center;text-decoration:none">📱 1台で遊ぶ</a>
+    <a class="btn" href="https://yui-games.github.io/ponzi/" style="flex:1;text-align:center;text-decoration:none">🎲 ゲーム一覧へ</a>
+  </div>
+</section>
+
+<!-- ===== 待合室 ===== -->
+<section id="wait" class="win hidden">
+  <div class="title"><span class="ico">🚪</span>待合室<span class="sp"></span><span class="tb">×</span></div>
+  <div class="pad">
+    <div class="small" style="text-align:center">部屋コード</div>
+    <div class="code" id="wCode"></div>
+    <div class="qr" id="wQrBox"><div id="wQr"></div></div>
+    <div class="small" style="text-align:center">QRをスマホのカメラで読むか、コードを入力してもらってください</div>
+    <div style="display:flex;gap:6px;margin:8px 0"><button class="btn" id="btnLink" style="flex:1">参加リンクをコピー</button></div>
+    <div id="wSeats"></div>
+    <div class="small" id="wSettings" style="margin:6px 0"></div>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <button class="btn" id="btnLeave" style="flex:0 0 auto">退室</button>
+      <button class="btn big default" id="btnStart" style="flex:1;width:auto">ゲーム開始（ホスト）</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 対戦画面 ===== -->
+<section id="game" class="win hidden">
+  <div class="title"><span class="ico">💣</span>五十音マインスイーパー<span class="sp"></span><span class="tb">_</span><span class="tb">□</span><span class="tb">×</span></div>
+  <div class="topbar"><span class="conn" id="conn"></span><span id="tCode"></span><span class="sp"></span><button class="btn" id="btnLobby" style="padding:2px 8px;min-height:0;font-size:12px">退室</button><button class="btn" id="btnHub" style="padding:2px 8px;min-height:0;font-size:12px" title="ゲーム一覧へ">🎲 一覧</button></div>
+  <div class="spec hidden" id="specNote"></div>
+  <div class="panel sunk deep">
+    <div class="ledwrap"><div class="led" id="ledLeft"></div><div class="lbl">爆弾のこり</div></div>
+    <button class="btn face" id="face" title="結果">🙂</button>
+    <div class="ledwrap"><div class="led" id="ledRight"></div><div class="lbl">手数</div></div>
+  </div>
+  <div class="players">
+    <div class="pl p0 sunk" id="pl0"><span class="flag">🚩</span><div><div class="nm"></div><div class="st"></div></div></div>
+    <div class="pl p1 sunk" id="pl1"><span class="flag">🚩</span><div><div class="nm"></div><div class="st"></div></div></div>
+  </div>
+  <div class="status" id="hint"></div>
+  <div class="boardwrap sunk deep"><div class="board" id="board"></div></div>
+  <div class="actions">
+    <button class="btn" id="btnDeclare">単語を宣言する</button>
+  </div>
+  <div class="sunk"><div class="log" id="log"></div></div>
+</section>
+
+<!-- 宣言ダイアログ -->
+<div class="overlay hidden" id="mDeclare">
+  <div class="win dlg">
+    <div class="title"><span class="ico">💬</span>単語を宣言<span class="sp"></span><span class="tb">×</span></div>
+    <div class="body">
+      <input type="text" id="declareWord" placeholder="ひらがなで入力" autocomplete="off">
+      <div class="err" id="declareErr"></div>
+      <div class="btns"><button class="btn" id="btnDeclareCancel">やめる</button><button class="btn default" id="btnDeclareOk" style="font-weight:700">これだ！</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- 結果ダイアログ -->
+<div class="overlay hidden" id="mResult">
+  <div class="win dlg">
+    <div class="title"><span class="ico">🏁</span>結果<span class="sp"></span><span class="tb">×</span></div>
+    <div class="body">
+      <div class="big" id="resultTitle"></div>
+      <div class="muted" style="text-align:center">お題</div>
+      <div class="answer" id="resultWord"></div>
+      <div class="muted" style="text-align:center" id="resultSub"></div>
+      <div id="againSetter" class="hidden" style="margin-top:10px">
+        <div class="small">次のお題（出題者が入力）</div>
+        <input type="text" id="againWord" placeholder="ひらがな・カタカナ" autocomplete="off">
+        <div class="err" id="againErr"></div>
+      </div>
+      <div class="btns"><button class="btn" id="btnResClose">閉じる</button><button class="btn default" id="btnAgain" style="font-weight:700">もう一度（ホスト）</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="gojuon_core.js"></script>
+<script src="gojuon_ui.js"></script>
+<script src="qr.js"></script>
+<script>
+/* オンライン版クライアント。盤面の中身（お題）はサーバーだけが知っている。
+   ここは「部屋に入る → 待つ → 手番のときだけ操作を送る → 定期的に状態をもらう」だけ。 */
+const C=window.GojuonCore, UI=window.GojuonUI;
+const $=id=>document.getElementById(id);
+const LSK='gojuon_online_v1';
+const DEFAULT_SRV='https://gojuon-server.yui-games.workers.dev';
+const HUB_URL='https://yui-games.github.io/ponzi/';
+const ST={srv:'',code:'',pid:'',you:-1,role:'',rev:-1,view:null,room:null,busy:false,logN:0,shownOver:false,cmode:'random',level:'easy'};
+
+function saveST(){try{localStorage.setItem(LSK,JSON.stringify({srv:ST.srv,code:ST.code,pid:ST.pid,nm:$('nm').value,level:ST.level}));}catch(e){}}
+function loadST(){try{return JSON.parse(localStorage.getItem(LSK))||{};}catch(e){return {};}}
+function esc(s){return UI.esc(s);}
+let toastTimer=null;
+function toast(msg,ms){const t=$('toast');t.textContent=msg;t.classList.add('show');if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),ms||1400);}
+
+/* ---------- 通信 ---------- */
+async function api(path,method,body,qs){
+  const url=ST.srv.replace(/\/+$/,'')+path+(qs||'');
+  const r=await fetch(url,{method:method||'GET',headers:{'content-type':'application/json'},body:body?JSON.stringify(body):undefined});
+  let j=null;try{j=await r.json();}catch(e){}
+  if(!j)throw new Error('サーバーの応答が読めませんでした');
+  return j;
+}
+function lobbyErr(msg){$('lobbyErr').textContent=msg||'';}
+
+/* ---------- ロビー ---------- */
+function setCMode(m){ST.cmode=m;$('cmRandom').classList.toggle('on',m==='random');$('cmSetter').classList.toggle('on',m==='setter');$('cRandom').classList.toggle('hidden',m!=='random');$('cSetter').classList.toggle('hidden',m!=='setter');}
+function setLevel(l){if(!C.LEVELS[l])l='easy';ST.level=l;document.querySelectorAll('#levels .btn').forEach(b=>b.classList.toggle('on',b.dataset.level===l));}
+$('cmRandom').onclick=()=>setCMode('random');$('cmSetter').onclick=()=>setCMode('setter');
+document.querySelectorAll('#levels .btn').forEach(b=>b.onclick=()=>setLevel(b.dataset.level));
+C.GENRES.forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;$('genre').appendChild(o);});
+$('setWord').addEventListener('input',()=>{const n=C.normalize($('setWord').value);$('setPreview').textContent=n.bad.length?'使えない文字があります：'+n.bad.join(' '):(n.kana?'盤面での扱い：'+[...n.kana].join(' ')+'（'+n.kana.length+'文字・'+C.LEVELS[C.levelOf(n.kana.length)].label+'）':'');});
+
+$('btnCreate').onclick=async()=>{
+  ST.srv=$('srv').value.trim()||DEFAULT_SRV;
+  const body={hostName:$('nm').value.trim(),mode:ST.cmode,level:ST.level,genre:$('genre').value,showGenre:$('optGenre').checked,optLen:$('optLen').checked,optCascade:$('optCascade').checked};
+  if(ST.cmode==='setter'){body.word=$('setWord').value.trim();const n=C.normalize(body.word);if(n.bad.length){lobbyErr('使えない文字があります：'+n.bad.join(' '));return;}if(n.kana.length<2){lobbyErr('お題は2文字以上にしてください');return;}}
+  try{
+    const j=await api('/api/room/create','POST',body);
+    if(!j.ok)throw new Error(j.error||'部屋を作れませんでした');
+    ST.code=j.code;ST.pid=j.playerId;ST.you=j.seat;ST.role=j.role;saveST();lobbyErr('');$('setWord').value='';toWait();poll();
+  }catch(e){lobbyErr(e.message);}
+};
+$('btnJoin').onclick=async()=>{
+  ST.srv=$('srv').value.trim()||DEFAULT_SRV;
+  const code=$('code').value.trim().toUpperCase();
+  if(code.length!==4){lobbyErr('部屋コードは4文字です');return;}
+  try{
+    const j=await api('/api/room/'+code+'/join','POST',{name:$('nm').value.trim()});
+    if(!j.ok)throw new Error(j.error||'入れませんでした');
+    ST.code=code;ST.pid=j.playerId;ST.you=j.seat;ST.role=j.role;saveST();lobbyErr('');toWait();poll();
+  }catch(e){lobbyErr(e.message);}
+};
+$('btnStart').onclick=async()=>{
+  try{const j=await api('/api/room/'+ST.code+'/start','POST',{playerId:ST.pid});if(!j.ok)toast(j.error||'開始できませんでした',1800);else poll();}catch(e){toast(e.message,1800);}
+};
+function joinUrl(){return location.origin+location.pathname+'?r='+ST.code+(ST.srv!==DEFAULT_SRV?'&s='+encodeURIComponent(ST.srv):'');}
+$('btnLink').onclick=()=>{
+  const u=joinUrl();
+  if(navigator.clipboard)navigator.clipboard.writeText(u).then(()=>toast('参加リンクをコピーしました。LINEなどで送ってください',2000),()=>prompt('このリンクをコピーしてください',u));
+  else prompt('このリンクをコピーしてください',u);
+};
+function leaveRoom(){
+  if(ST.view&&!ST.view.over&&!confirm('この部屋から抜けます。\n同じリンクを開けば戻ってこられます。'))return;
+  if(timer)clearTimeout(timer);
+  localStorage.removeItem(LSK);location.href=location.pathname;
+}
+$('btnLeave').onclick=leaveRoom;$('btnLobby').onclick=leaveRoom;
+$('btnHub').onclick=()=>{
+  if(ST.view&&!ST.view.over&&!confirm('ゲーム一覧ページへ移動します。\nこのページを開き直せば部屋に戻れます。'))return;
+  location.href=HUB_URL;
+};
+
+/* ---------- 画面切り替え ---------- */
+function show(id){['lobby','wait','game'].forEach(x=>$(x).classList.toggle('hidden',x!==id));}
+function toWait(){show('wait');$('wCode').textContent=ST.code;renderQr();}
+function toGame(){show('game');$('tCode').textContent='部屋 '+ST.code+(ST.role==='setter'?'・出題者':ST.you<0?'・観戦':'');}
+function renderQr(){
+  const el=$('wQr');if(typeof qrcode!=='function'){$('wQrBox').style.display='none';return;}
+  if(el.dataset.code===ST.code)return;
+  try{const q=qrcode(0,'M');q.addData(joinUrl());q.make();el.innerHTML=q.createSvgTag({cellSize:6,margin:3,scalable:true});el.dataset.code=ST.code;$('wQrBox').style.display='';}
+  catch(e){$('wQrBox').style.display='none';}
+}
+
+/* ---------- ポーリング ---------- */
+let timer=null,failCnt=0;
+async function poll(){
+  if(timer)clearTimeout(timer);
+  try{
+    const j=await api('/api/room/'+ST.code+'/state','GET',null,'?playerId='+ST.pid);
+    failCnt=0;$('conn').classList.remove('bad');
+    const changed=(j.rev!==ST.rev)||!ST.view;   // 盤面を作り直すのは変化があったときだけ（タップ中に消えないように）
+    ST.room=j.room;ST.you=j.you;ST.role=j.role;ST.rev=j.rev;
+    if(j.started&&j.view){takeView(j.view);toGame();if(changed)renderGame();}
+    else{toWait();renderWait();}
+  }catch(e){failCnt++;if(failCnt>1)$('conn').classList.add('bad');}
+  const myTurn=ST.view&&!ST.view.over&&ST.view.cur===ST.you;
+  timer=setTimeout(poll,myTurn?2500:1200);
+}
+function takeView(v){
+  if(ST.view&&v.log.length<ST.logN){ST.shownOver=false;$('mResult').classList.add('hidden');}
+  ST.view=v;
+}
+
+/* ---------- 待合室 ---------- */
+function renderWait(){
+  const r=ST.room;if(!r)return;
+  let h='';
+  [0,1].forEach(s=>{const p=r.players.find(x=>x.seat===s);
+    h+='<div class="seat"><span class="dot'+(p&&p.connected?' on':'')+'"></span>'+(p?'<b>'+esc(p.name)+'</b>':'<span class="small">空席（'+(s===0?'先攻':'後攻')+'）… 入室を待っています</span>')
+      +(p&&ST.you===s?'<span class="small">（あなた）</span>':'')+(p&&p.seat===r.hostSeat?'<span class="tag">👑ホスト</span>':'')+'</div>';});
+  r.players.filter(p=>p.seat<0).forEach(p=>{h+='<div class="seat"><span class="dot'+(p.connected?' on':'')+'"></span>'+esc(p.name)+'<span class="tag">'+(p.role==='setter'?'🔒出題者':'👀観戦')+'</span></div>';});
+  $('wSeats').innerHTML=h;
+  $('wSettings').textContent=r.mode==='setter'?'お題：出題者が入力済み':'お題：ランダム（'+(C.LEVELS[r.level]||C.LEVELS.easy).label+(r.genre?'・'+r.genre:'')+'）';
+  $('btnStart').classList.toggle('hidden',!(ST.you===r.hostSeat&&ST.role===r.hostRole));
+}
+
+/* ---------- 対戦 ---------- */
+function renderGame(){
+  const V=ST.view;if(!V)return;
+  const canAct=ST.you>=0&&!V.over&&V.cur===ST.you;
+  UI.render(V,{onPick:k=>send({type:'pick',k}),canAct,you:ST.you});
+  const note=$('specNote');
+  if(ST.role==='setter'){note.textContent='あなたは出題者です。2人の推理を見守ってください。';note.classList.remove('hidden');}
+  else if(ST.you<0){note.textContent='観戦中です（対戦席は2つとも埋まっています）。';note.classList.remove('hidden');}
+  else note.classList.add('hidden');
+  if(V.over&&!ST.shownOver){ST.shownOver=true;setTimeout(showResult,600);}
+  ST.logN=V.log.length;
+}
+async function send(move){
+  if(ST.busy)return;ST.busy=true;
+  try{
+    const j=await api('/api/room/'+ST.code+'/action','POST',{playerId:ST.pid,move,rev:ST.rev});
+    if(!j.ok){if(!j.stale)toast(j.err||'その操作はできませんでした',1500);}
+    else{ST.rev=j.rev;if(j.view){takeView(j.view);renderGame();}}
+    return j;
+  }catch(e){toast('通信できませんでした。電波を確認してください',1600);}
+  finally{ST.busy=false;poll();}
+}
+$('btnDeclare').onclick=()=>{if(!ST.view||ST.view.over||ST.view.cur!==ST.you)return;$('declareWord').value='';$('declareErr').textContent='';$('mDeclare').classList.remove('hidden');setTimeout(()=>$('declareWord').focus(),50);};
+$('btnDeclareCancel').onclick=()=>$('mDeclare').classList.add('hidden');
+async function doDeclare(){
+  const raw=$('declareWord').value.trim();const n=C.normalize(raw);
+  if(!n.kana){$('declareErr').textContent='ひらがなで入力してください';return;}
+  if(n.bad.length){$('declareErr').textContent='使えない文字があります：'+n.bad.join(' ');return;}
+  $('mDeclare').classList.add('hidden');
+  const j=await send({type:'declare',word:raw});
+  if(j&&j.ok&&j.result&&!j.result.correct)toast('ハズレ…',1400);
+}
+$('btnDeclareOk').onclick=doDeclare;
+$('declareWord').addEventListener('keydown',e=>{if(e.key==='Enter')doDeclare();});
+$('face').onclick=()=>{if(ST.view&&ST.view.over)showResult();};
+function showResult(){
+  const V=ST.view;if(!V)return;
+  const w=V.winner;
+  $('resultTitle').textContent=w===null||w===undefined?'ゲーム終了':(w===ST.you?'🎉 あなたの勝ち！':'🎉 '+V.names[w]+' の勝ち！');
+  $('resultTitle').style.color=w===null||w===undefined?'#000':(w===0?'var(--p1)':'var(--p2)');
+  $('resultWord').textContent=V.word||'';
+  $('resultSub').textContent=V.kana?'盤面：'+[...V.kana].join(' ')+'（'+V.kana.length+'文字・'+V.level+'）　／　'+(V.turn-1)+'手':'';
+  const r=ST.room;const isHost=r&&ST.you===r.hostSeat&&ST.role===r.hostRole;
+  $('againSetter').classList.toggle('hidden',!(isHost&&r.mode==='setter'));$('againErr').textContent='';
+  $('btnAgain').classList.toggle('hidden',!isHost);
+  $('mResult').classList.remove('hidden');
+}
+$('btnResClose').onclick=()=>$('mResult').classList.add('hidden');
+$('btnAgain').onclick=async()=>{
+  const body={playerId:ST.pid,level:ST.level};
+  if(ST.room&&ST.room.mode==='setter'){body.word=$('againWord').value.trim();const n=C.normalize(body.word);if(n.bad.length){$('againErr').textContent='使えない文字があります：'+n.bad.join(' ');return;}if(n.kana.length<2){$('againErr').textContent='2文字以上にしてください';return;}}
+  try{const j=await api('/api/room/'+ST.code+'/restart','POST',body);if(!j.ok)toast(j.error||'再戦できませんでした',1800);else{$('mResult').classList.add('hidden');$('againWord').value='';poll();}}catch(e){toast(e.message,1800);}
+};
+window.addEventListener('resize',()=>{if(ST.view)renderGame();});
+
+/* ---------- 起動 ---------- */
+(function init(){
+  const saved=loadST(),q=new URLSearchParams(location.search);
+  const joinCode=(q.get('r')||'').toUpperCase();
+  $('srv').value=q.get('s')||saved.srv||DEFAULT_SRV;
+  if(joinCode)$('code').value=joinCode;
+  setCMode('random');setLevel(saved.level||'easy');
+  if(saved.srv&&saved.code&&saved.pid&&(!joinCode||joinCode===saved.code)){
+    ST.srv=saved.srv;ST.code=saved.code;ST.pid=saved.pid;$('nm').value=saved.nm||'';
+    toWait();poll();return;
+  }
+  $('nm').value=saved.nm||'';
+})();
+</script>
+</body>
+</html>

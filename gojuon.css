@@ -1,0 +1,101 @@
+/* 五十音マインスイーパー 共通スタイル（Windows時代のマインスイーパー風）。index.html と online.html で共有 */
+:root{
+    --desk:#008080; --gray:#c0c0c0; --dark:#808080; --light:#ffffff; --black:#000;
+    --title1:#000080; --title2:#1084d0;
+    --p1:#0000ff; --p2:#ff0000;
+    --n1:#0000ff; --n2:#008000; --n3:#ff0000; --n4:#000080; --n5:#800000; --n6:#008080; --n7:#000; --n8:#808080;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--desk);color:var(--black);font-family:"MS UI Gothic","Yu Gothic UI","Meiryo","Hiragino Sans",system-ui,sans-serif;line-height:1.4;font-size:14px}
+  body{padding:10px 8px 28px}
+  .hidden{display:none!important}
+
+  /* ===== Win95 部品 ===== */
+  .win{background:var(--gray);border:2px solid;border-color:var(--light) var(--black) var(--black) var(--light);box-shadow:inset -1px -1px var(--dark),inset 1px 1px #dfdfdf;padding:3px;margin:0 auto 12px;max-width:760px}
+  .title{display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,var(--title1),var(--title2));color:#fff;font-weight:700;padding:3px 6px;font-size:14px;margin-bottom:6px;user-select:none}
+  .title .ico{font-size:14px}
+  .title .sp{flex:1}
+  .title .tb{width:16px;height:14px;background:var(--gray);border:1px solid;border-color:var(--light) var(--black) var(--black) var(--light);color:#000;font-size:10px;line-height:11px;text-align:center;font-weight:900}
+  .sunk{background:var(--gray);border:2px solid;border-color:var(--dark) var(--light) var(--light) var(--dark)}
+  .sunk.deep{border-width:3px}
+  .raised{border:2px solid;border-color:var(--light) var(--dark) var(--dark) var(--light)}
+  fieldset{padding:8px 10px 10px;margin:6px 4px 10px;border:1px solid var(--dark);box-shadow:1px 1px 0 var(--light) inset,1px 1px 0 var(--light)}
+  legend{padding:0 4px;font-weight:700}
+  .btn{display:inline-block;font:inherit;font-size:14px;background:var(--gray);color:#000;border:2px solid;border-color:var(--light) var(--black) var(--black) var(--light);box-shadow:inset -1px -1px var(--dark),inset 1px 1px #dfdfdf;padding:6px 14px;cursor:pointer;user-select:none;min-height:34px}
+  .btn:active{border-color:var(--black) var(--light) var(--light) var(--black);box-shadow:inset 1px 1px var(--dark)}
+  .btn:disabled{color:var(--dark);text-shadow:1px 1px var(--light);cursor:default}
+  .btn.big{font-weight:700;font-size:16px;padding:9px 16px;width:100%}
+  .btn.on{background:#e8e8e8;border-color:var(--black) var(--light) var(--light) var(--black);box-shadow:inset 1px 1px var(--dark);font-weight:700}
+  .btn.default{outline:1px solid #000;outline-offset:-4px}
+  input[type=text]{font:inherit;font-size:16px;padding:6px 8px;width:100%;background:#fff;border:2px solid;border-color:var(--dark) var(--light) var(--light) var(--dark);box-shadow:inset 1px 1px var(--black)}
+  select{font:inherit;font-size:14px;padding:4px 6px;background:#fff;border:2px solid;border-color:var(--dark) var(--light) var(--light) var(--dark)}
+  label.row{display:flex;align-items:center;gap:8px;margin:6px 0}
+  label.row input[type=text]{flex:1}
+  input[type=checkbox]{width:18px;height:18px;accent-color:#000}
+  .muted{color:#333;font-size:12px}
+  .modes{display:flex;gap:6px;margin:4px 0 8px}
+  .modes .btn{flex:1;line-height:1.2}
+  .modes .btn small{font-weight:400;font-size:10px;color:#333}
+  ol.rules{padding-left:20px;margin:4px 0;font-size:13px}
+  ol.rules li{margin:3px 0}
+  .pad{padding:6px 6px 8px}
+
+  /* ===== ヘッダパネル（カウンタ・顔・カウンタ） ===== */
+  .panel{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;margin:0 0 6px}
+  .led{display:flex;gap:1px;background:#000;border:1px solid;border-color:var(--dark) var(--light) var(--light) var(--dark);padding:2px 3px}
+  .led svg{display:block}
+  .ledwrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+  .ledwrap .lbl{font-size:11px;color:#333;line-height:1}
+  .face{width:52px;height:52px;font-size:30px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;min-height:0}
+
+  /* ===== プレイヤー表示 ===== */
+  .players{display:flex;gap:6px;margin:0 0 6px}
+  .pl{flex:1;min-width:0;padding:5px 8px;background:var(--gray);font-size:13px;display:flex;align-items:center;gap:6px;min-height:40px}
+  .pl .flag{font-size:18px;width:22px;text-align:center;visibility:hidden}
+  .pl.cur .flag{visibility:visible}
+  .pl.cur{background:#fff;outline:1px dotted #000;outline-offset:-5px}
+  .pl .nm{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pl.p0 .nm{color:var(--p1)} .pl.p1 .nm{color:var(--p2)}
+  .pl .st{font-size:11px;color:#333}
+  .pl .skip{color:#c00;font-weight:700}
+  .status{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;padding:5px 8px;margin:0 0 6px;background:var(--gray);border:1px solid;border-color:var(--dark) var(--light) var(--light) var(--dark)}
+  .status b{font-size:14px}
+  .found{display:inline-flex;gap:3px;flex-wrap:wrap;vertical-align:middle}
+  .found span{background:#ff0000;color:#fff;padding:0 6px;font-weight:700;border:1px solid #800000;font-size:12px}
+
+  /* ===== 盤面 ===== */
+  .boardwrap{padding:6px;margin:0 0 6px}
+  .board{display:grid;gap:0;margin:0 auto;user-select:none;width:100%}
+  .cell{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;min-width:0;background:var(--gray);border:3px solid;border-color:var(--light) var(--dark) var(--dark) var(--light);font-size:22px;font-weight:700;color:#000;cursor:pointer;font-family:"MS Gothic","Yu Gothic","Meiryo","Hiragino Sans",sans-serif}
+  .cell:active{border:1px solid var(--dark);border-width:1px 0 0 1px}
+  .cell.open{border:1px solid var(--dark);border-width:1px 0 0 1px;background:var(--gray);cursor:default}
+  .cell.open .k{position:absolute;top:1px;left:3px;font-size:9px;color:#666;font-weight:400}
+  .cell.open .n{font-size:24px;font-family:"Courier New",monospace;font-weight:900}
+  .cell.open.n0 .n{color:#999;font-size:0}
+  .cell.open.n1 .n{color:var(--n1)} .cell.open.n2 .n{color:var(--n2)} .cell.open.n3 .n{color:var(--n3)} .cell.open.n4 .n{color:var(--n4)}
+  .cell.open.n5 .n{color:var(--n5)} .cell.open.n6 .n{color:var(--n6)} .cell.open.n7 .n{color:var(--n7)} .cell.open.n8 .n{color:var(--n8)}
+  .cell.bomb{background:#ff0000}
+  .cell.bomb .k{color:#fff;font-weight:700;font-size:11px}
+  .cell.bomb .n{font-size:22px}
+  .cell.bomb .x{position:absolute;right:2px;bottom:0;font-size:11px;background:#fff;color:#c00;padding:0 4px;font-weight:900;border:1px solid #800000}
+  .cell.disabled{pointer-events:none}
+  .cell.flash{animation:pop .3s ease}
+  @keyframes pop{0%{transform:scale(.85)}100%{transform:scale(1)}}
+
+  .actions{display:flex;gap:6px;margin:0 0 6px}
+  .actions .btn{flex:1;font-weight:700}
+  @media (max-width:619px){ .actions{position:sticky;bottom:6px;z-index:5;background:var(--gray);padding:4px 0} }
+  .log{font-size:12px;max-height:150px;overflow:auto;background:#fff;padding:4px 6px;font-family:"MS Gothic","Courier New",monospace}
+  .log div{padding:1px 0}
+  .log .p0{color:var(--p1)} .log .p1{color:var(--p2)}
+
+  /* ===== ダイアログ ===== */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;padding:14px;z-index:10}
+  .dlg{width:100%;max-width:400px;margin:0}
+  .dlg .body{padding:10px 8px 8px}
+  .dlg .btns{display:flex;gap:6px;margin-top:12px}
+  .dlg .btns .btn{flex:1}
+  .err{color:#c00;font-size:13px;margin-top:6px;min-height:18px}
+  .big{font-size:26px;font-weight:900;text-align:center;margin:6px 0}
+  .answer{font-size:26px;text-align:center;letter-spacing:.1em;margin:4px 0 2px;font-weight:700}
+  .secret{font-size:14px}

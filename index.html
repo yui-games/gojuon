@@ -5,108 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>五十音マインスイーパー</title>
-<style>
-  :root{
-    --desk:#008080; --gray:#c0c0c0; --dark:#808080; --light:#ffffff; --black:#000;
-    --title1:#000080; --title2:#1084d0;
-    --p1:#0000ff; --p2:#ff0000;
-    --n1:#0000ff; --n2:#008000; --n3:#ff0000; --n4:#000080; --n5:#800000; --n6:#008080; --n7:#000; --n8:#808080;
-  }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{margin:0;background:var(--desk);color:var(--black);font-family:"MS UI Gothic","Yu Gothic UI","Meiryo","Hiragino Sans",system-ui,sans-serif;line-height:1.4;font-size:14px}
-  body{padding:10px 8px 28px}
-  .hidden{display:none!important}
-
-  /* ===== Win95 部品 ===== */
-  .win{background:var(--gray);border:2px solid;border-color:var(--light) var(--black) var(--black) var(--light);box-shadow:inset -1px -1px var(--dark),inset 1px 1px #dfdfdf;padding:3px;margin:0 auto 12px;max-width:760px}
-  .title{display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,var(--title1),var(--title2));color:#fff;font-weight:700;padding:3px 6px;font-size:14px;margin-bottom:6px;user-select:none}
-  .title .ico{font-size:14px}
-  .title .sp{flex:1}
-  .title .tb{width:16px;height:14px;background:var(--gray);border:1px solid;border-color:var(--light) var(--black) var(--black) var(--light);color:#000;font-size:10px;line-height:11px;text-align:center;font-weight:900}
-  .sunk{background:var(--gray);border:2px solid;border-color:var(--dark) var(--light) var(--light) var(--dark)}
-  .sunk.deep{border-width:3px}
-  .raised{border:2px solid;border-color:var(--light) var(--dark) var(--dark) var(--light)}
-  fieldset{padding:8px 10px 10px;margin:6px 4px 10px;border:1px solid var(--dark);box-shadow:1px 1px 0 var(--light) inset,1px 1px 0 var(--light)}
-  legend{padding:0 4px;font-weight:700}
-  .btn{display:inline-block;font:inherit;font-size:14px;background:var(--gray);color:#000;border:2px solid;border-color:var(--light) var(--black) var(--black) var(--light);box-shadow:inset -1px -1px var(--dark),inset 1px 1px #dfdfdf;padding:6px 14px;cursor:pointer;user-select:none;min-height:34px}
-  .btn:active{border-color:var(--black) var(--light) var(--light) var(--black);box-shadow:inset 1px 1px var(--dark)}
-  .btn:disabled{color:var(--dark);text-shadow:1px 1px var(--light);cursor:default}
-  .btn.big{font-weight:700;font-size:16px;padding:9px 16px;width:100%}
-  .btn.on{background:#e8e8e8;border-color:var(--black) var(--light) var(--light) var(--black);box-shadow:inset 1px 1px var(--dark);font-weight:700}
-  .btn.default{outline:1px solid #000;outline-offset:-4px}
-  input[type=text]{font:inherit;font-size:16px;padding:6px 8px;width:100%;background:#fff;border:2px solid;border-color:var(--dark) var(--light) var(--light) var(--dark);box-shadow:inset 1px 1px var(--black)}
-  select{font:inherit;font-size:14px;padding:4px 6px;background:#fff;border:2px solid;border-color:var(--dark) var(--light) var(--light) var(--dark)}
-  label.row{display:flex;align-items:center;gap:8px;margin:6px 0}
-  label.row input[type=text]{flex:1}
-  input[type=checkbox]{width:18px;height:18px;accent-color:#000}
-  .muted{color:#333;font-size:12px}
-  .modes{display:flex;gap:6px;margin:4px 0 8px}
-  .modes .btn{flex:1;line-height:1.2}
-  .modes .btn small{font-weight:400;font-size:10px;color:#333}
-  ol.rules{padding-left:20px;margin:4px 0;font-size:13px}
-  ol.rules li{margin:3px 0}
-  .pad{padding:6px 6px 8px}
-
-  /* ===== ヘッダパネル（カウンタ・顔・カウンタ） ===== */
-  .panel{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;margin:0 0 6px}
-  .led{display:flex;gap:1px;background:#000;border:1px solid;border-color:var(--dark) var(--light) var(--light) var(--dark);padding:2px 3px}
-  .led svg{display:block}
-  .ledwrap{display:flex;flex-direction:column;align-items:center;gap:2px}
-  .ledwrap .lbl{font-size:11px;color:#333;line-height:1}
-  .face{width:52px;height:52px;font-size:30px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;min-height:0}
-
-  /* ===== プレイヤー表示 ===== */
-  .players{display:flex;gap:6px;margin:0 0 6px}
-  .pl{flex:1;min-width:0;padding:5px 8px;background:var(--gray);font-size:13px;display:flex;align-items:center;gap:6px;min-height:40px}
-  .pl .flag{font-size:18px;width:22px;text-align:center;visibility:hidden}
-  .pl.cur .flag{visibility:visible}
-  .pl.cur{background:#fff;outline:1px dotted #000;outline-offset:-5px}
-  .pl .nm{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .pl.p0 .nm{color:var(--p1)} .pl.p1 .nm{color:var(--p2)}
-  .pl .st{font-size:11px;color:#333}
-  .pl .skip{color:#c00;font-weight:700}
-  .status{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;padding:5px 8px;margin:0 0 6px;background:var(--gray);border:1px solid;border-color:var(--dark) var(--light) var(--light) var(--dark)}
-  .status b{font-size:14px}
-  .found{display:inline-flex;gap:3px;flex-wrap:wrap;vertical-align:middle}
-  .found span{background:#ff0000;color:#fff;padding:0 6px;font-weight:700;border:1px solid #800000;font-size:12px}
-
-  /* ===== 盤面 ===== */
-  .boardwrap{padding:6px;margin:0 0 6px}
-  .board{display:grid;gap:0;margin:0 auto;user-select:none;width:100%}
-  .cell{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;min-width:0;background:var(--gray);border:3px solid;border-color:var(--light) var(--dark) var(--dark) var(--light);font-size:22px;font-weight:700;color:#000;cursor:pointer;font-family:"MS Gothic","Yu Gothic","Meiryo","Hiragino Sans",sans-serif}
-  .cell:active{border:1px solid var(--dark);border-width:1px 0 0 1px}
-  .cell.open{border:1px solid var(--dark);border-width:1px 0 0 1px;background:var(--gray);cursor:default}
-  .cell.open .k{position:absolute;top:1px;left:3px;font-size:9px;color:#666;font-weight:400}
-  .cell.open .n{font-size:24px;font-family:"Courier New",monospace;font-weight:900}
-  .cell.open.n0 .n{color:#999;font-size:0}
-  .cell.open.n1 .n{color:var(--n1)} .cell.open.n2 .n{color:var(--n2)} .cell.open.n3 .n{color:var(--n3)} .cell.open.n4 .n{color:var(--n4)}
-  .cell.open.n5 .n{color:var(--n5)} .cell.open.n6 .n{color:var(--n6)} .cell.open.n7 .n{color:var(--n7)} .cell.open.n8 .n{color:var(--n8)}
-  .cell.bomb{background:#ff0000}
-  .cell.bomb .k{color:#fff;font-weight:700;font-size:11px}
-  .cell.bomb .n{font-size:22px}
-  .cell.bomb .x{position:absolute;right:2px;bottom:0;font-size:11px;background:#fff;color:#c00;padding:0 4px;font-weight:900;border:1px solid #800000}
-  .cell.disabled{pointer-events:none}
-  .cell.flash{animation:pop .3s ease}
-  @keyframes pop{0%{transform:scale(.85)}100%{transform:scale(1)}}
-
-  .actions{display:flex;gap:6px;margin:0 0 6px}
-  .actions .btn{flex:1;font-weight:700}
-  @media (max-width:619px){ .actions{position:sticky;bottom:6px;z-index:5;background:var(--gray);padding:4px 0} }
-  .log{font-size:12px;max-height:150px;overflow:auto;background:#fff;padding:4px 6px;font-family:"MS Gothic","Courier New",monospace}
-  .log div{padding:1px 0}
-  .log .p0{color:var(--p1)} .log .p1{color:var(--p2)}
-
-  /* ===== ダイアログ ===== */
-  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;padding:14px;z-index:10}
-  .dlg{width:100%;max-width:400px;margin:0}
-  .dlg .body{padding:10px 8px 8px}
-  .dlg .btns{display:flex;gap:6px;margin-top:12px}
-  .dlg .btns .btn{flex:1}
-  .err{color:#c00;font-size:13px;margin-top:6px;min-height:18px}
-  .big{font-size:26px;font-weight:900;text-align:center;margin:6px 0}
-  .answer{font-size:26px;text-align:center;letter-spacing:.1em;margin:4px 0 2px;font-weight:700}
-  .secret{font-size:14px}
-</style>
+<link rel="stylesheet" href="gojuon.css">
 </head>
 <body>
 
@@ -114,9 +13,17 @@
 <section id="scrSetup" class="win">
   <div class="title"><span class="ico">💣</span>五十音マインスイーパー<span class="sp"></span><span class="tb">_</span><span class="tb">□</span><span class="tb">×</span></div>
   <fieldset>
+    <legend>あそぶ人数</legend>
+    <div class="modes">
+      <button class="btn on" id="pcTwo">2人で交代<br><small>先に当てたほうの勝ち</small></button>
+      <button class="btn" id="pcOne">ひとりで<br><small>最少手数に挑戦</small></button>
+    </div>
+    <p class="muted" id="pcNote" style="margin:4px 0 0"></p>
+  </fieldset>
+  <fieldset>
     <legend>プレイヤー</legend>
-    <label class="row"><span style="color:var(--p1);font-weight:700;width:34px">先攻</span><input type="text" id="name0" maxlength="10" placeholder="プレイヤー1"></label>
-    <label class="row"><span style="color:var(--p2);font-weight:700;width:34px">後攻</span><input type="text" id="name1" maxlength="10" placeholder="プレイヤー2"></label>
+    <label class="row"><span style="color:var(--p1);font-weight:700;width:34px" id="lbl0">先攻</span><input type="text" id="name0" maxlength="10" placeholder="プレイヤー1"></label>
+    <label class="row" id="row1"><span style="color:var(--p2);font-weight:700;width:34px">後攻</span><input type="text" id="name1" maxlength="10" placeholder="プレイヤー2"></label>
   </fieldset>
   <fieldset>
     <legend>お題の決め方</legend>
@@ -142,6 +49,10 @@
     <label class="row"><input type="checkbox" id="optCascade">数字が0のマスは、まわりも自動で開く（すぐ終わりやすくなります）</label>
   </fieldset>
   <div class="pad"><button class="btn big default" id="btnStart">はじめる</button></div>
+  <div class="pad" style="padding-top:0;display:flex;gap:6px">
+    <a class="btn" href="online.html" style="flex:1;text-align:center;text-decoration:none">🌐 オンライン対戦</a>
+    <a class="btn" href="https://yui-games.github.io/ponzi/" style="flex:1;text-align:center;text-decoration:none">🎲 ゲーム一覧へ</a>
+  </div>
   <fieldset>
     <legend>あそびかた</legend>
     <ol class="rules">
@@ -151,6 +62,7 @@
       <li>自分の番には、文字を選ぶ代わりに「単語を宣言」もできます。当たれば勝ち。外れてもお休みはありません。</li>
       <li>濁点・半濁点・小さい文字は区別しません（「が」は「か」、「っ」は「つ」のマス）。「ー」（のばす音）も1マスとして数えます。</li>
       <li>同じ文字が2回使われていれば、そのマスの爆弾は2個として数えます。</li>
+      <li>「ひとりで」は手番の交代なし。開いたマス・宣言が1手ずつ、爆弾は2手ぶん（お休みのかわり）。できるだけ少ない手数で当てましょう。ランダム出題なら難易度ごとのベスト記録が残ります。</li>
     </ol>
   </fieldset>
 </section>
@@ -196,6 +108,7 @@
   <div class="actions">
     <button class="btn" id="btnDeclare">単語を宣言する</button>
     <button class="btn" id="btnGiveUp" style="flex:0 0 auto">終了</button>
+    <button class="btn" id="btnHub" style="flex:0 0 auto" title="ゲーム一覧へ">🎲</button>
   </div>
   <div class="sunk"><div class="log" id="log"></div></div>
 </section>
@@ -226,6 +139,17 @@
   </div>
 </div>
 
+<!-- ハブへ戻る確認 -->
+<div class="overlay hidden" id="mHub">
+  <div class="win dlg">
+    <div class="title"><span class="ico">🎲</span>ゲーム一覧へ<span class="sp"></span><span class="tb">×</span></div>
+    <div class="body">
+      <p style="margin:4px 0">対戦の途中です。ゲーム一覧（ボードゲーム置き場）へ移動しますか？<br><span class="muted">この対戦は終了します。</span></p>
+      <div class="btns"><button class="btn default" id="btnHubCancel">つづける</button><button class="btn" id="btnHubOk">移動する</button></div>
+    </div>
+  </div>
+</div>
+
 <!-- 終了確認 -->
 <div class="overlay hidden" id="mQuit">
   <div class="win dlg">
@@ -237,92 +161,32 @@
   </div>
 </div>
 
+<script src="gojuon_core.js"></script>
+<script src="gojuon_ui.js"></script>
 <script>
-/* ===== 盤面（列=行、行=段） ===== */
-const COLS = ['あいうえお','かきくけこ','さしすせそ','たちつてと','なにぬねの','はひふへほ','まみむめも','や ゆ よ','らりるれろ','わをんー '];
-const CELLS = []; const CELL_OF = {};
-COLS.forEach((s,c)=>{ [...s].forEach((k,r)=>{ if(k!==' '){ const cell={k,c,r,nb:[]}; CELLS.push(cell); CELL_OF[k]=cell; } }); });
-CELLS.forEach(a=>{ CELLS.forEach(b=>{ if(a!==b && Math.abs(a.c-b.c)<=1 && Math.abs(a.r-b.r)<=1) a.nb.push(b); }); });
-
-/* ===== 文字の正規化 ===== */
-const MAP = {が:'か',ぎ:'き',ぐ:'く',げ:'け',ご:'こ',ざ:'さ',じ:'し',ず:'す',ぜ:'せ',ぞ:'そ',だ:'た',ぢ:'ち',づ:'つ',で:'て',ど:'と',
-  ば:'は',び:'ひ',ぶ:'ふ',べ:'へ',ぼ:'ほ',ぱ:'は',ぴ:'ひ',ぷ:'ふ',ぺ:'へ',ぽ:'ほ',ぁ:'あ',ぃ:'い',ぅ:'う',ぇ:'え',ぉ:'お',
-  っ:'つ',ゃ:'や',ゅ:'ゆ',ょ:'よ',ゎ:'わ',ゐ:'い',ゑ:'え',ゔ:'う'};
-const DROP = new Set(['・','　',' ','、','。','!','！','?','？']);
-const LONG = new Set(['－','―','‐','-','～','〜','ｰ']); // 長音の表記ゆれ → ー
-function normalize(str){
-  let out='', bad=[];
-  for(let ch of (str||'').normalize('NFC')){
-    const code=ch.charCodeAt(0);
-    if(code>=0x30A1 && code<=0x30F6) ch=String.fromCharCode(code-0x60); // カタカナ→ひらがな
-    if(code===0x3099||code===0x309A) continue; // 結合濁点
-    if(DROP.has(ch)) continue;
-    if(LONG.has(ch)) ch='ー';
-    if(MAP[ch]) ch=MAP[ch];
-    if(CELL_OF[ch]) out+=ch; else bad.push(ch);
-  }
-  return {kana:out,bad};
-}
-
-/* ===== ランダム出題の単語 ===== */
-const WORDS = {
-  'たべもの':['おにぎり','らーめん','おすし','てんぷら','からあげ','やきとり','おでん','なっとう','みそしる','たこやき','おこのみやき','ぎょうざ','かれーらいす','はんばーぐ','おむらいす','うどん','やきそば','ぱすた','ぴざ','さんどいっち','ちゃーはん','ぷりん','けーき','あいすくりーむ','だんご','せんべい','ちょこれーと','どーなつ','くっきー','ぽてと','さしみ','やきにく','しゃぶしゃぶ','すきやき','とんかつ','ころっけ','えびふらい','たまごやき','ほっとけーき','めろんぱん','ぽっぷこーん','ぐらたん','しちゅー','おもち','ようかん',
-    'とんこつらーめん','てりやきばーがー','ちーずはんばーぐ','みっくすじゅーす','ふるーつさんど','かぼちゃのにもの','かれーうどん','ぽてとさらだ','くりーむしちゅー','ぎゅうどん','さばのみそに','ちきんなんばん','ぶたのしょうがやき','にくじゃが','ほっとどっぐ','めろんそーだ','いちごだいふく','たいやき','ちょこれーとぱふぇ','ばにらあいすくりーむ','はんばーぐかれー','みそらーめん','しおやきそば','おやこどん','かつどん','てんどん','ちらしずし','いなりずし','のりべんとう','からあげべんとう','たまごさんどいっち','ふらいどちきん','ちーずけーき','しょーとけーき','ぷりんあらもーど','ちょこばなな','わたあめ','かきごおり','りんごあめ','やきとうもろこし',
-    'なぽりたんすぱげってぃ','ほうれんそうのおひたし','ちょこれーとぱふぇのいちごのせ','きのこたっぷりくりーむぱすた','とろけるちーずのぴざとーすと','じゃがいもとにんじんのにもの','てりやきちきんはんばーがー','いちごのしょーとけーきとこうちゃ','さくさくえびふらいていしょく','とんかつとせんきゃべつていしょく','おにぎりとみそしるのあさごはん','ばにらあいすのちょこそーすがけ','ふわふわぱんけーきのはちみつがけ','てんぷらそばとおいなりさん','なつやさいのかれーらいす'],
-  'くだもの・やさい':['りんご','みかん','ばなな','いちご','ぶどう','すいか','めろん','もも','さくらんぼ','きうい','ぱいなっぷる','れもん','にんじん','たまねぎ','じゃがいも','きゅうり','とまと','なすび','かぼちゃ','だいこん','きゃべつ','れたす','ほうれんそう','ぴーまん','ぶろっこりー','とうもろこし','さつまいも','しいたけ','ごぼう','れんこん',
-    'ますかっと','ぐれーぷふるーつ','どらごんふるーつ','ぶるーべりー','らずべりー','ぷちとまと','あすぱらがす','かりふらわー','さやえんどう','えだまめ','もやし','しょうが','にんにく','はくさい','ちんげんさい','こまつな','みずな','えのきだけ','まいたけ','しめじ','ぱぱいや','まんごー','らいち','ざくろ','いちじく','あんず','びわ','かき','くり','なし',
-    'おおきなすいかとめろん','あかいりんごとあおいりんご','あまいいちごのしょーとけーき','なつやさいのらたとぅいゆ','ばななとまんごーのすむーじー','ほくほくさつまいものてんぷら','きゃべつとにんじんのさらだ','ぶどうとめろんのふるーつぽんち'],
-  'どうぶつ':['いぬ','ねこ','うさぎ','ぞう','きりん','らいおん','とら','さる','ぱんだ','こあら','かんがるー','ぺんぎん','いるか','くじら','さめ','たこ','いか','かに','かめ','かえる','へび','わに','とかげ','にわとり','ひよこ','あひる','はと','すずめ','からす','ふくろう','くま','しか','いのしし','きつね','たぬき','りす','ねずみ','はむすたー','うま','うし','ぶた','ひつじ','やぎ','らくだ','ごりら','こうもり','ちょうちょ','かぶとむし','くわがた','とんぼ','せみ','ばった','ありんこ','みつばち','てんとうむし','かたつむり','くらげ','ひとで','さかな','きんぎょ',
-    'でんきうなぎ','きんめだい','しろくま','ほっきょくぐま','くろひょう','じゃいあんとぱんだ','こうていぺんぎん','らっこ','のこぎりくわがた','みずくらげ','おおさんしょううお','てぃらのさうるす','とりけらとぷす','ぷてらのどん','ちんぱんじー','おらんうーたん','かめれおん','いぐあな','はりねずみ','ふらみんご','だちょう','くじゃく','はくちょう','ぺりかん','かわせみ','うぐいす','つばめ','まんぼう','たつのおとしご','うみがめ','あざらし','せいうち','しゃち','まっこうくじら','じんべえざめ','おおかみ','ひぐま','にほんざる','ありくい',
-    'あふりかぞうとあじあぞう','くろひょうとしろくまのけんか','みなみのしまのこうていぺんぎん','ちいさなはりねずみのさんぽ','さばんなをはしるちーたー','うみをおよぐじんべえざめ','おおきなきりんのながいくび','ほっきょくぐまのおやこ'],
-  'のりもの':['でんしゃ','しんかんせん','ばす','たくしー','じてんしゃ','ひこうき','ろけっと','しょうぼうしゃ','きゅうきゅうしゃ','ぱとかー','とらっく','ばいく','へりこぷたー','せんすいかん','きしゃ','ふね','ゆーふぉー','くるま','ぶるどーざー','ごんどら',
-    'でんきじどうしゃ','ものれーる','ろーぷうぇい','けーぶるかー','きゃんぴんぐかー','しょうぼうへり','せんとうき','じぇっときちょう','くれーんしゃ','ごみしゅうしゅうしゃ','ろーどろーらー','しょべるかー','だんぷかー','みきさーしゃ','ゆうらんせん','ふぇりー','よっと','かぬー','ぼーと','かーとれーん','すくーたー','さんりんしゃ','いちりんしゃ','でんどうきっくぼーど',
-    'ほっかいどうしんかんせん','とうきょうえきのしんかんせん','まちをはしるろーどばいく','しょうぼうしゃとはしごしゃ','そらをとぶじぇっとき','うみをわたるおおきなふぇりー','やまをのぼるけーぶるかー','ゆうえんちのじぇっとこーすたー'],
-  'みのまわり':['えんぴつ','けしごむ','のーと','はさみ','つくえ','いす','とけい','めがね','かばん','かさ','くつ','ぼうし','てぶくろ','まふらー','たおる','はぶらし','せっけん','しゃんぷー','まくら','ふとん','かーてん','てれび','でんわ','すまほ','ぱそこん','れいぞうこ','せんたくき','そうじき','えあこん','かがみ','ざぶとん','こたつ','らんどせる','ものさし','ほうちょう','ふらいぱん','やかん','ちゃわん','おはし',
-    'せんたくばさみ','でんしれんじ','すまーとふぉん','のーとぱそこん','でじたるかめら','ふでばこ','くれよん','いろえんぴつ','しゅうせいてーぷ','ほっちきす','せろはんてーぷ','ぼーるぺん','しゃーぷぺんしる','けいこうぺん','じょうぎ','ぶんどき','こんぱす','すいとう','おべんとうばこ','はんかち','てぃっしゅ','めざましどけい','でんきすたんど','ほんだな','たんす','そふぁー','てーぶる','かーぺっと','すりっぱ','さんだる','れいんこーと','ながぐつ','おりたたみがさ','でんちゅう','ぽすと','じどうはんばいき',
-    'えあこんのりもこん','ぶるーとぅーすいやほん','しんかんせんのきっぷ','せんたくきとかんそうき','とうきょうたわーのおみやげ','おきにいりのまんがぼん','あたらしいらんどせる','おばあちゃんのめがね','てぶくろとまふらーとにっとぼう','なつやすみのしゅくだい'],
-  'しぜん・ばしょ':['やま','かわ','うみ','そら','くも','あめ','ゆき','かぜ','にじ','たいよう','つき','ほし','はな','もり','さくら','ひまわり','たんぽぽ','あさがお','ちゅーりっぷ','こうえん','がっこう','びょういん','ゆうえんち','どうぶつえん','すいぞくかん','としょかん','えき','くうこう','おんせん','はなび','おまつり','おしろ','かみなり','たいふう','さばく','みずうみ','たき','かざん',
-    'とうきょうたわー','おおさかじょう','ふじさん','なごやじょう','さっぽろゆきまつり','ほっかいどう','おきなわ','きょうと','ひろしま','ふくおか','せんだい','よこはま','なごや','こうべ','ながさき','かごしま','やまなし','ながの','にいがた','しずおか','ゆうやけ','あさやけ','ほしぞら','まんげつ','みかづき','おおあめ','つゆ','きりさめ','こうよう','しんりょく','うみべ','すなはま','さんごしょう','ぼくじょう','たんぼ','はたけ','じんじゃ','おてら','ぷらねたりうむ','はくぶつかん','びじゅつかん','えいがかん','ゆうびんきょく','こうばん','しょうぼうしょ','ゆうえんちのかんらんしゃ',
-    'とうきょうすかいつりー','きょうとのきんかくじ','あおもりのねぶたまつり','ほっかいどうのらべんだーばたけ','おきなわのあおいうみ','ふじさんのごらいこう','さっぽろのゆきまつり','なつのよるのはなびたいかい','はるのこうえんのさくらなみき','あきのやまのこうよう','ふゆのあさのしもばしら','うみべのすなはまでかいひろい'],
-  'すぽーつ・あそび':['やきゅう','さっかー','てにす','すいえい','ばすけっと','ばれーぼーる','たっきゅう','まらそん','すきー','すけーと','けんだま','おりがみ','こま','たこあげ','かるた','すごろく','じゃんけん','かくれんぼ','おにごっこ','なわとび','ぶらんこ','すべりだい','しーそー','てつぼう','ぼうりんぐ','ごるふ','からおけ','つみき','ぱずる','ぬりえ','しゃぼんだま',
-    'けいどろ','だるまさんがころんだ','はないちもんめ','おしくらまんじゅう','かごめかごめ','じゃんけんぽん','らじおたいそう','うんどうかい','つなひき','たまいれ','きばせん','ぱんくいきょうそう','にんげんぴらみっど','ばすけっとぼーる','ばどみんとん','ぷろやきゅう','こうしえん','おりんぴっく','まらそんたいかい','りれー','はばとび','たかとび','てつぼうのさかあがり','じゅうどう','けんどう','からて','すもう','ぼくしんぐ','ふぃぎゅあすけーと','すのーぼーど','さーふぃん','ろっくくらいみんぐ','とらんぷ','おはじき','おてだま','あやとり','ふくわらい','すいかわり','たからさがし','しりとり','なぞなぞ','ぼーどげーむ','てれびげーむ',
-    'さっかーのわーるどかっぷ','うんどうかいのりれーきょうそう','なつやすみのらじおたいそう','ぷーるでのすいえいたいかい','こうえんでのかくれんぼ','ゆきのひのゆきがっせん','だるまさんがころんだであそぶ','おおなわとびでひゃっかいとぶ','やきゅうのこうしえんけっしょう','ふゆのすきーじょうでそりあそび'],
-  'ことわざ・いいまわし':['ねこにこばん','ぶたにしんじゅ','ななころびやおき','さるもきからおちる','かっぱのかわながれ','とうだいもとくらし','じゅうにんといろ','いっせきにちょう','たなからぼたもち','うまのみみにねんぶつ','あめふってじかたまる','はなよりだんご','いぬもあるけばぼうにあたる','ちりもつもればやまとなる','いしのうえにもさんねん','はやおきはさんもんのとく','のうあるたかはつめをかくす','せんりのみちもいっぽから','ふくすいぼんにかえらず','さわらぬかみにたたりなし','わらうかどにはふくきたる','ねんにはねんをいれよ','あとはのとなれやまとなれ','おににかなぼう','えびでたいをつる','かえるのこはかえる','ないたからすがもうわらう','ひゃくぶんはいっけんにしかず','みのほどをしる','なきっつらにはち','いそがばまわれ','ぜんはいそげ','ろんよりしょうこ','やすものがいのぜにうしない','くさってもたい','うそからでたまこと','おびにみじかしたすきにながし','かべにみみありしょうじにめあり','かほうはねてまて','でるくいはうたれる','さんにんよればもんじゅのちえ','ちょうちんにつりがね','にかいからめぐすり','ぬかにくぎ','のれんにうでおし','みからでたさび','あたまかくしてしりかくさず','おぼれるものはわらをもつかむ','となりのしばふはあおい','はなしじょうずはききじょうず'],
-};
-for(const g in WORDS){ WORDS[g]=WORDS[g].filter(w=>{const n=normalize(w);return n.bad.length===0&&n.kana.length>=2;}); }
-// 難易度（盤面での文字数で判定）: かんたん=5以下 / ふつう=6〜10 / むずかしい=11以上
-const LEVELS={easy:{label:'かんたん',min:2,max:5},normal:{label:'ふつう',min:6,max:10},hard:{label:'むずかしい',min:11,max:99}};
-function levelOf(len){ return len<=5?'easy':(len<=10?'normal':'hard'); }
-
-/* ===== 7セグ表示 ===== */
-const SEG = {'0':'abcdef','1':'bc','2':'abdeg','3':'abcdg','4':'bcfg','5':'acdfg','6':'acdefg','7':'abc','8':'abcdefg','9':'abcdfg','-':'g',' ':''};
-const SEGP = {a:'2,1 4,0 18,0 20,1 18,3 4,3', b:'21,2 22,4 22,17 21,19 19,17 19,4', c:'21,20 22,22 22,35 21,37 19,35 19,22',
-  d:'2,38 4,36 18,36 20,38 18,39 4,39', e:'1,20 3,22 3,35 1,37 0,35 0,22', f:'1,2 3,4 3,17 1,19 0,17 0,4', g:'2,19.5 4,18 18,18 20,19.5 18,21 4,21'};
-function led(el,text,digits){
-  const s=String(text).padStart(digits,' ').slice(-digits);
-  el.innerHTML=[...s].map(ch=>{const on=SEG[ch]||'';return `<svg width="24" height="40" viewBox="-1 -1 24 41">${Object.keys(SEGP).map(k=>`<polygon points="${SEGP[k]}" fill="${on.includes(k)?'#ff2020':'#3a0000'}"/>`).join('')}</svg>`;}).join('');
-}
-
-/* ===== 状態 ===== */
+/* ソロ版（1台を2人で交代）。ルールは gojuon_core.js、描画は gojuon_ui.js。ここは画面の流れだけ。 */
+const C=window.GojuonCore, UI=window.GojuonUI;
 const $=id=>document.getElementById(id);
 const LS='gojuon_ms_v1';
-let pref={name0:'',name1:'',mode:'input',level:'easy',genre:'',optGenre:true,optLen:true,optCascade:false};
+const HUB_URL='https://yui-games.github.io/ponzi/';
+let pref={name0:'',name1:'',mode:'input',level:'easy',genre:'',optGenre:true,optLen:true,optCascade:false,players:2};
+let best={};try{best=JSON.parse(localStorage.getItem('gojuon_best')||'{}');}catch(e){}
 try{Object.assign(pref,JSON.parse(localStorage.getItem(LS)||'{}'));}catch(e){}
 function savePref(){
-  pref.name0=$('name0').value.trim(); pref.name1=$('name1').value.trim();
-  pref.genre=$('genre').value; pref.optGenre=$('optGenre').checked; pref.optLen=$('optLen').checked; pref.optCascade=$('optCascade').checked;
+  pref.name0=$('name0').value.trim();pref.name1=$('name1').value.trim();
+  pref.genre=$('genre').value;pref.optGenre=$('optGenre').checked;pref.optLen=$('optLen').checked;pref.optCascade=$('optCascade').checked;
   try{localStorage.setItem(LS,JSON.stringify(pref));}catch(e){}
 }
 let G=null;
 
-/* ===== 設定画面 ===== */
 function initSetup(){
-  const sel=$('genre'); Object.keys(WORDS).forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;sel.appendChild(o);});
-  $('name0').value=pref.name0; $('name1').value=pref.name1; sel.value=pref.genre;
-  $('optGenre').checked=pref.optGenre; $('optLen').checked=pref.optLen; $('optCascade').checked=pref.optCascade;
-  setMode(pref.mode); setLevel(pref.level);
+  const sel=$('genre');C.GENRES.forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;sel.appendChild(o);});
+  $('name0').value=pref.name0;$('name1').value=pref.name1;sel.value=pref.genre;
+  $('optGenre').checked=pref.optGenre;$('optLen').checked=pref.optLen;$('optCascade').checked=pref.optCascade;
+  setMode(pref.mode);setLevel(pref.level);setPlayers(pref.players);
+  $('pcTwo').onclick=()=>setPlayers(2);$('pcOne').onclick=()=>setPlayers(1);
   document.querySelectorAll('#levels .btn').forEach(b=>b.onclick=()=>setLevel(b.dataset.level));
-  $('modeInput').onclick=()=>setMode('input'); $('modeRandom').onclick=()=>setMode('random');
+  $('modeInput').onclick=()=>setMode('input');$('modeRandom').onclick=()=>setMode('random');
   $('btnStart').onclick=startFromSetup;
   $('btnSecretBack').onclick=()=>show('scrSetup');
   $('btnSecretOk').onclick=confirmSecret;
@@ -334,152 +198,84 @@ function initSetup(){
   $('btnDeclareOk').onclick=doDeclare;
   $('declareWord').addEventListener('keydown',e=>{if(e.key==='Enter')doDeclare();});
   $('btnGiveUp').onclick=()=>$('mQuit').classList.remove('hidden');
-  $('face').onclick=()=>{ if(G&&G.over){$('mResult').classList.remove('hidden');} else $('mQuit').classList.remove('hidden'); };
+  $('btnHub').onclick=()=>{if(G&&!G.over)$('mHub').classList.remove('hidden');else location.href=HUB_URL;};
+  $('btnHubCancel').onclick=()=>$('mHub').classList.add('hidden');
+  $('btnHubOk').onclick=()=>{location.href=HUB_URL;};
+  $('face').onclick=()=>{if(G&&G.over)$('mResult').classList.remove('hidden');else $('mQuit').classList.remove('hidden');};
   $('btnQuitCancel').onclick=()=>$('mQuit').classList.add('hidden');
-  $('btnQuitOk').onclick=()=>{$('mQuit').classList.add('hidden');finish(null);};
+  $('btnQuitOk').onclick=()=>{$('mQuit').classList.add('hidden');C.finish(G,null);showResult();};
   $('btnToSetup').onclick=()=>{$('mResult').classList.add('hidden');show('scrSetup');};
   $('btnAgain').onclick=()=>{$('mResult').classList.add('hidden');startFromSetup();};
   window.addEventListener('resize',()=>{if(G)render();});
 }
-function setLevel(l){ if(!LEVELS[l]) l='easy'; pref.level=l; document.querySelectorAll('#levels .btn').forEach(b=>b.classList.toggle('on',b.dataset.level===l)); }
-function setMode(m){ pref.mode=m; $('modeInput').classList.toggle('on',m==='input'); $('modeRandom').classList.toggle('on',m==='random');
+function setPlayers(n){pref.players=(n===1?1:2);const solo=pref.players===1;$('pcTwo').classList.toggle('on',!solo);$('pcOne').classList.toggle('on',solo);$('row1').classList.toggle('hidden',solo);$('lbl0').textContent=solo?'名前':'先攻';
+  $('pcNote').textContent=solo?'手番の交代なし。爆弾は2手ぶん。少ない手数で正解を目指します。':'2人が交互に文字を選び、先に当てたほうの勝ち。';}
+function setLevel(l){if(!C.LEVELS[l])l='easy';pref.level=l;document.querySelectorAll('#levels .btn').forEach(b=>b.classList.toggle('on',b.dataset.level===l));}
+function setMode(m){pref.mode=m;$('modeInput').classList.toggle('on',m==='input');$('modeRandom').classList.toggle('on',m==='random');
   $('randomOpts').classList.toggle('hidden',m!=='random');
-  $('modeNote').textContent = m==='input' ? '遊ぶ2人以外の人がお題を入力します。入力中は2人に画面を見せないでください。' : 'アプリがお題を決めます。2人とも知らない状態で遊べます。'; }
-function show(id){ ['scrSetup','scrSecret','scrHandoff','scrGame'].forEach(s=>$(s).classList.toggle('hidden',s!==id)); window.scrollTo(0,0); }
-function names(){ return [pref.name0||'プレイヤー1', pref.name1||'プレイヤー2']; }
+  $('modeNote').textContent=m==='input'?'遊ぶ2人以外の人がお題を入力します。入力中は2人に画面を見せないでください。':'アプリがお題を決めます。2人とも知らない状態で遊べます。';}
+function show(id){['scrSetup','scrSecret','scrHandoff','scrGame'].forEach(s=>$(s).classList.toggle('hidden',s!==id));window.scrollTo(0,0);}
+function names(){return pref.players===1?[pref.name0||'あなた']:[pref.name0||'プレイヤー1',pref.name1||'プレイヤー2'];}
+function bestKey(){return G&&G.solo&&G.random?('best_'+pref.level):null;}
 
 function startFromSetup(){
   savePref();
   if(pref.mode==='random'){
-    const lv=LEVELS[pref.level]||LEVELS.easy;
-    const inLevel=w=>{const n=normalize(w).kana.length;return n>=lv.min&&n<=lv.max;};
-    let pool=[];
-    if(pref.genre && WORDS[pref.genre]) pool=WORDS[pref.genre].filter(inLevel).map(w=>[w,pref.genre]);
-    if(!pool.length) for(const g in WORDS) WORDS[g].filter(inLevel).forEach(w=>pool.push([w,g]));
-    const [w,g]=pool[Math.floor(Math.random()*pool.length)];
-    newGame(w, pref.optGenre?g:'');
-    show('scrGame'); render();
+    const w=C.pickWord(pref.level,pref.genre);
+    newGame(w.word,pref.optGenre?w.genre:'');G.random=true;
+    show('scrGame');render();
   }else{
-    $('secretWord').value=''; $('secretErr').textContent=''; $('secretPreview').textContent='';
-    show('scrSecret'); setTimeout(()=>$('secretWord').focus(),50);
+    $('secretWord').value='';$('secretErr').textContent='';$('secretPreview').textContent='';
+    show('scrSecret');setTimeout(()=>$('secretWord').focus(),50);
   }
 }
 function previewSecret(){
-  const n=normalize($('secretWord').value);
-  $('secretPreview').textContent = n.kana ? `盤面での扱い：${[...n.kana].join(' ')}（${n.kana.length}文字）` : '';
-  $('secretErr').textContent = n.bad.length ? `使えない文字があります：${n.bad.join(' ')}` : '';
+  const n=C.normalize($('secretWord').value);
+  $('secretPreview').textContent=n.kana?'盤面での扱い：'+[...n.kana].join(' ')+'（'+n.kana.length+'文字・'+C.LEVELS[C.levelOf(n.kana.length)].label+'）':'';
+  $('secretErr').textContent=n.bad.length?'使えない文字があります：'+n.bad.join(' '):'';
 }
 function confirmSecret(){
-  const raw=$('secretWord').value.trim(); const n=normalize(raw);
-  if(n.bad.length){ $('secretErr').textContent=`使えない文字があります：${n.bad.join(' ')}`; return; }
-  if(n.kana.length<2){ $('secretErr').textContent='2文字以上にしてください'; return; }
-  newGame(raw,''); $('secretWord').value=''; $('secretPreview').textContent='';
+  const raw=$('secretWord').value.trim();const n=C.normalize(raw);
+  if(n.bad.length){$('secretErr').textContent='使えない文字があります：'+n.bad.join(' ');return;}
+  if(n.kana.length<2){$('secretErr').textContent='2文字以上にしてください';return;}
+  newGame(raw,'');$('secretWord').value='';$('secretPreview').textContent='';
   show('scrHandoff');
 }
+function newGame(word,genre){G=C.createGame({word,genre,optLen:pref.optLen,optCascade:pref.optCascade,names:names(),solo:pref.players===1});}
 
-/* ===== ゲーム本体 ===== */
-function newGame(word,genre){
-  const kana=normalize(word).kana; const bombs={};
-  for(const ch of kana) bombs[ch]=(bombs[ch]||0)+1;
-  G={word,kana,genre,bombs,opened:new Set(),cur:0,skip:[false,false],log:[],turn:1,over:false,winner:null,guesses:0,face:'🙂'};
-  addLog(`ゲーム開始。${names()[0]} からスタート`);
-}
-function countAround(cell){ return cell.nb.reduce((s,b)=>s+(G.bombs[b.k]||0),0); }
-function addLog(text,p){ G.log.unshift({text,p}); }
-function foundLetters(){ const r=[]; for(const k of G.opened){ if(G.bombs[k]) r.push(k); } return r; }
-
-function pick(k){
-  if(!G||G.over||G.opened.has(k)) return;
-  const cell=CELL_OF[k]; const me=G.cur; const nm=names()[me];
-  G.opened.add(k); G.lastPick=k;
-  if(G.bombs[k]){
-    G.skip[me]=true; G.face='😵';
-    addLog(`${nm}「${k}」→ 💣爆弾${G.bombs[k]>1?'×'+G.bombs[k]:''}！ 次の番はお休み`,me);
-  }else{
-    const n=countAround(cell); G.face='🙂';
-    addLog(`${nm}「${k}」→ ${n}`,me);
-    if(pref.optCascade && n===0) cascade(cell);
-  }
-  nextTurn(); render();
-}
-function cascade(cell){
-  const stack=[cell];
-  while(stack.length){ const c=stack.pop();
-    for(const b of c.nb){ if(G.opened.has(b.k)||G.bombs[b.k]) continue; G.opened.add(b.k); if(countAround(b)===0) stack.push(b); } }
-}
-function nextTurn(){
-  let n=1-G.cur;
-  while(G.skip[n]){ G.skip[n]=false; addLog(`${names()[n]} はお休み`,n); n=1-n; }
-  G.cur=n; G.turn++;
-}
+function pick(k){if(!G||G.over)return;const r=C.actPick(G,k);if(r.ok)render();}
 function openDeclare(){
-  if(!G||G.over) return;
-  $('mDeclareTitle').textContent=`${names()[G.cur]} の宣言`;
-  $('declareWord').value=''; $('declareErr').textContent='';
-  $('mDeclare').classList.remove('hidden'); setTimeout(()=>$('declareWord').focus(),50);
+  if(!G||G.over)return;
+  $('mDeclareTitle').textContent=G.solo?'単語を宣言（ハズレも1手）':G.names[G.cur]+' の宣言';
+  $('declareWord').value='';$('declareErr').textContent='';
+  $('mDeclare').classList.remove('hidden');setTimeout(()=>$('declareWord').focus(),50);
 }
 function doDeclare(){
-  const raw=$('declareWord').value.trim(); const n=normalize(raw);
-  if(!n.kana){ $('declareErr').textContent='ひらがなで入力してください'; return; }
-  if(n.bad.length){ $('declareErr').textContent=`使えない文字があります：${n.bad.join(' ')}`; return; }
+  const r=C.actDeclare(G,$('declareWord').value.trim());
+  if(!r.ok){$('declareErr').textContent=r.error;return;}
   $('mDeclare').classList.add('hidden');
-  const me=G.cur; const nm=names()[me]; G.guesses++;
-  if(n.kana===G.kana){ addLog(`${nm} が「${raw}」と宣言 → 正解！`,me); finish(me); return; }
-  addLog(`${nm} が「${raw}」と宣言 → ハズレ`,me); G.face='😮';
-  nextTurn(); render();
+  if(r.correct)showResult();else render();
 }
-function finish(winner){
-  G.over=true; G.winner=winner; G.face = winner===null ? '😐' : '😎';
-  CELLS.forEach(c=>G.opened.add(c.k));
+function showResult(){
   render();
-  const nm=names();
-  $('resultTitle').textContent = winner===null ? 'ゲーム終了' : `🎉 ${nm[winner]} の勝ち！`;
-  $('resultTitle').style.color = winner===null ? '#000' : (winner===0?'var(--p1)':'var(--p2)');
-  $('resultWord').textContent = G.word;
-  $('resultSub').textContent = `盤面：${[...G.kana].join(' ')}（${G.kana.length}文字・${LEVELS[levelOf(G.kana.length)].label}）　／　${G.turn-1}手`;
+  if(G.solo){
+    const moves=G.turn-1,k=bestKey();
+    if(G.winner===null){$('resultTitle').textContent='ゲーム終了';}
+    else{
+      let msg='🎉 正解！ '+moves+'手';
+      if(k){const prev=best[k];if(!prev||moves<prev){best[k]=moves;try{localStorage.setItem('gojuon_best',JSON.stringify(best));}catch(e){}msg+=prev?'（ベスト更新！ 前は'+prev+'手）':'（はじめての記録）';}else msg+='（ベスト '+prev+'手）';}
+      $('resultTitle').textContent=msg;
+    }
+    $('resultTitle').style.color='var(--p1)';
+  }else{
+  $('resultTitle').textContent=G.winner===null?'ゲーム終了':'🎉 '+G.names[G.winner]+' の勝ち！';
+  $('resultTitle').style.color=G.winner===null?'#000':(G.winner===0?'var(--p1)':'var(--p2)');
+  }
+  $('resultWord').textContent=G.word;
+  $('resultSub').textContent='盤面：'+[...G.kana].join(' ')+'（'+G.kana.length+'文字・'+C.LEVELS[C.levelOf(G.kana.length)].label+'）　／　'+(G.turn-1)+'手';
   $('mResult').classList.remove('hidden');
 }
-
-/* ===== 描画 ===== */
-function render(){
-  if(!G) return;
-  const nm=names();
-  const found=foundLetters(); const total=G.kana.length;
-  const foundCount=found.reduce((s,k)=>s+G.bombs[k],0);
-  led($('ledLeft'), pref.optLen ? (total-foundCount) : '---', 3);
-  led($('ledRight'), Math.min(G.turn,999), 3);
-  $('face').textContent=G.face;
-  [0,1].forEach(i=>{ const el=$('pl'+i); el.classList.toggle('cur',!G.over&&G.cur===i);
-    el.querySelector('.nm').textContent=(i===0?'先攻 ':'後攻 ')+nm[i];
-    el.querySelector('.st').innerHTML = G.skip[i] ? '<span class="skip">次の番はお休み</span>' : (!G.over&&G.cur===i ? 'いまの番' : '&nbsp;'); });
-
-  let h='';
-  h+=`<span>難易度：<b>${LEVELS[levelOf(total)].label}</b></span>`;
-  if(G.genre) h+=`<span>ジャンル：<b>${G.genre}</b></span>`;
-  if(pref.optLen) h+=`<span>文字数：<b>${total}</b></span>`;
-  h+=`<span>見つかった文字：<span class="found">${found.length?found.map(k=>`<span>${k}${G.bombs[k]>1?'×'+G.bombs[k]:''}</span>`).join(''):'<span style="background:#ddd;color:#555;border-color:#999">なし</span>'}</span></span>`;
-  $('hint').innerHTML=h;
-
-  const narrow=window.innerWidth<620;
-  const b=$('board'); b.innerHTML='';
-  b.style.gridTemplateColumns = narrow ? 'repeat(5,1fr)' : 'repeat(10,1fr)';
-  b.style.maxWidth = narrow ? '400px' : '';
-  for(const c of CELLS){
-    const d=document.createElement('div'); d.className='cell'; d.setAttribute('role','button'); d.setAttribute('aria-label','マス '+c.k);
-    d.style.gridColumn = narrow ? (c.r+1) : (c.c+1);
-    d.style.gridRow = narrow ? (c.c+1) : (c.r+1);
-    if(G.opened.has(c.k)){
-      if(G.bombs[c.k]){ d.classList.add('open','bomb'); d.innerHTML=`<span class="k">${c.k}</span><span class="n">💣</span>${G.bombs[c.k]>1?`<span class="x">×${G.bombs[c.k]}</span>`:''}`; }
-      else{ const n=countAround(c); d.classList.add('open','n'+n); d.innerHTML=`<span class="k">${c.k}</span><span class="n">${n}</span>`; }
-      if(c.k===G.lastPick && !G.over) d.classList.add('flash');
-    }else{
-      d.textContent=c.k; if(G.over) d.classList.add('disabled'); else d.onclick=()=>pick(c.k);
-    }
-    b.appendChild(d);
-  }
-  $('btnDeclare').disabled=G.over;
-  $('log').innerHTML=G.log.slice(0,40).map(l=>`<div class="${l.p===undefined?'':'p'+l.p}">${l.text}</div>`).join('');
-}
+function render(){if(!G)return;const V=C.viewFor(G,-1,'player');const k=bestKey();if(k&&best[k])V.best=best[k];UI.render(V,{onPick:pick,canAct:true,you:-1});}
 
 initSetup();
 </script>
